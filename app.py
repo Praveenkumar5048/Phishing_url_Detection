@@ -45,43 +45,23 @@ class PhishingDetector:
 
 # Load the phishing detector model
 def load_model():
-    # Print current working directory and potential model paths
-    print("Current Working Directory:", os.getcwd())
-    
-    # List multiple potential paths
-    potential_paths = [
-        "phishing_detector.pkl",
-        "Phishing_Detection/phishing_detector.pkl",
-        os.path.join(os.path.dirname(__file__), "phishing_detector.pkl"),
-        os.path.join(os.path.dirname(__file__), "Phishing_Detection/phishing_detector.pkl")
-    ]
-    
-    for model_path in potential_paths:
-        try:
-            print(f"Attempting to load model from: {model_path}")
-            print(f"Absolute path: {os.path.abspath(model_path)}")
-            
-            # Check if file exists
-            if not os.path.exists(model_path):
-                print(f"File does not exist: {model_path}")
-                continue
-            
-            # Try to load the model
-            with open(model_path, "rb") as f:
-                detector = pickle.load(f)
-            
-            print(f"Model successfully loaded from {model_path}")
-            return detector
+    model_path = "phishing_detector.pkl"
+    try:
+        with open(model_path, "rb") as f:
+            detector = pickle.load(f)
         
-        except FileNotFoundError:
-            print(f"File not found: {model_path}")
-        except pickle.UnpicklingError as e:
-            print(f"Unpickling error for {model_path}: {e}")
-        except Exception as e:
-            print(f"Unexpected error loading model from {model_path}:")
-            print(traceback.format_exc())
+        print(f"Model successfully loaded from {model_path}")
+        return detector
     
-    print("Failed to load model from all potential paths")
+    except FileNotFoundError:
+        print(f"File not found: {model_path}")
+    except pickle.UnpicklingError as e:
+        print(f"Unpickling error: {e}")
+    except Exception as e:
+        print("Unexpected error loading model:")
+        print(traceback.format_exc())
+    
+    print("Failed to load model.")
     return None
 
 # Initialize Flask app
