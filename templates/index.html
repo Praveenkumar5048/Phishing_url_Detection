@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IT352 Course Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background-color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .blue-button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            width: 300px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .blue-button:hover {
+            background-color: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>DEPARTMENT OF INFORMATION TECHNOLOGY</h2>
+        <h3>NATIONAL INSTITUTE OF TECHNOLOGY KARNATAKA, SURATHKAL-575025</h3>
+        <h4>Information Assurance and Security (IT352) Course Project</h4>
+    </div>
+    
+    <div class="button-container">
+        <a href="/input" class="blue-button">Press here to Enter Input</a>
+        <a href="/output" class="blue-button">Press here to display output on Screen</a>
+        <button class="blue-button" onclick="storeOutput()">Press here to store the output</button>
+    </div>
+
+    <script>
+        function storeOutput() {
+            fetch('/store', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                alert('Error storing output');
+            });
+        }
+    </script>
+</body>
+</html>

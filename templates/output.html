@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .output-container {
+            background-color: white;
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .safe {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .phishing {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="output-container">
+        <h3>Analysis Result</h3>
+        <div id="result-display" class="result"></div>
+    </div>
+
+    <script>
+        // Retrieve and display the analysis result
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultData = localStorage.getItem('analysisResult');
+            const resultDisplay = document.getElementById('result-display');
+
+            if (resultData) {
+                const data = JSON.parse(resultData);
+                
+                if (data.error) {
+                    resultDisplay.textContent = data.error;
+                    resultDisplay.className = 'result phishing';
+                } else {
+                    resultDisplay.innerHTML = `
+                        <strong>URL:</strong> ${data.url}<br>
+                        <strong>Status:</strong> ${data.prediction}
+                    `;
+                    resultDisplay.className = `result ${data.is_safe ? 'safe' : 'phishing'}`;
+                }
+
+                // Clear the stored result
+                localStorage.removeItem('analysisResult');
+            } else {
+                resultDisplay.textContent = 'No analysis result available';
+                resultDisplay.className = 'result phishing';
+            }
+        });
+    </script>
+</body>
+</html>
