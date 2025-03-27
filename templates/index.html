@@ -2,39 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IT352 Course Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing URL Detection - NITK</title>
     <style>
+        /* Base styles */
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
             padding: 20px;
         }
+
+        /* Header section */
         .header {
+            text-align: center;
             background-color: white;
-            padding: 10px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
         }
-        .blue-button {
-            background-color: #4A90E2;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            width: 300px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+
+        .header h2 {
+            color: #34495e;
+            margin-top: 5px;
         }
-        .blue-button:hover {
-            background-color: #357ABD;
+
+        .header h3 {
+            color: #7f8c8d;
         }
+
+        #title {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        /* Team info section */
         .team-info {
             display: flex;
             flex-direction: column;
@@ -42,67 +58,474 @@
             align-items: center;
             text-align: center;
             gap: 10px;
-            font-family: Arial, sans-serif;
             background-color: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
             width: fit-content;
-            margin: auto;
+            margin: 15px auto;
         }
 
         .team-info ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         .team-info li {
             font-weight: bold;
+            margin: 5px 0;
         }
-        #title{
-            color: green;
+
+        /* Main content sections */
+        section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Hide all sections by default */
+        }
+
+        #welcome-section {
+            display: block; /* Show the welcome section by default */
+            text-align: center;
+        }
+
+        /* Button styles */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            min-width: 300px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Input section */
+        #input-section form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #input-section input[type="text"] {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        #input-section input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Results section */
+        #result-section .result-container {
+            margin-top: 20px;
+        }
+
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result-box.safe {
+            background-color: rgba(46, 213, 115, 0.15);
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .result-box.phishing {
+            background-color: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-title.safe {
+            color: #2ed573;
+        }
+
+        .result-title.phishing {
+            color: #ff4757;
+        }
+
+        .result-url {
+            word-break: break-all;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        /* Loading animation */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        #csv-upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #csv-file-input {
+            display: none;
+        }
+
+        .file-upload-label {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .file-upload-label:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        #selected-file-name {
+            margin-top: 10px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .button {
+                min-width: 250px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>DEPARTMENT OF INFORMATION TECHNOLOGY</h2>
-        <h3>NATIONAL INSTITUTE OF TECHNOLOGY KARNATAKA, SURATHKAL-575025</h3>
-        <h4>Information Assurance and Security (IT352) Course Project</h4>
-        <h4 id="title">Title : Phishing URL Detection using Tiny-Bert and ML Algorithms</h4>
-        <div class="team-info">
-            <p>Carried out by</p>
-            <ul>
-                <li>
-                    Praveen Kumar - 221IT052
-                </li>
-                <li>
-                    Sagar Athani - 221IT058
-                </li>
-            </ul>
-            <p>During Academic Session January-April 2025</p>
+    <div class="container">
+        <div class="header">
+            <h1>DEPARTMENT OF INFORMATION TECHNOLOGY</h1>
+            <h2>NATIONAL INSTITUTE OF TECHNOLOGY KARNATAKA, SURATHKAL</h2>
+            <h3>Information Assurance and Security (IT352) Course Project</h3>
+            <h3 id="title">Phishing URL Detection using Tiny-Bert and ML Algorithms</h3>
+            <div class="team-info">
+                <p>Carried out by</p>
+                <ul>
+                    <li>Praveen Kumar - 221IT052</li>
+                    <li>Sagar Athani - 221IT058</li>
+                </ul>
+                <p>During Academic Session January-April 2025</p>
+            </div>
         </div>
-    </div>
-    
-    <div class="button-container">
-        <a href="/input" class="blue-button">Press here to Enter Input</a>
-        <a href="/output" class="blue-button">Press here to display output on Screen</a>
-        <button class="blue-button" onclick="storeOutput()">Press here to store the output</button>
+
+        <section id="welcome-section">
+            <h2>Welcome to Phishing URL Detection System</h2>
+            <p>This system uses machine learning models to analyze and detect potentially malicious URLs.</p>
+            
+            <div class="button-container">
+                <button class="button" onclick="showSection('input-section')">Enter URL Input</button>
+                <button class="button" onclick="showSection('csv-upload-section')">Bulk CSV Analysis</button>
+                <button class="button" onclick="showSection('result-section')">View Analysis Results</button>
+            </div>
+        </section>
+
+        <section id="input-section">
+            <h2>Enter URL to Analyze</h2>
+            <p>Enter a URL below to check if it's potentially malicious.</p>
+            
+            <form id="analyze-form">
+                <input type="text" id="url-input" placeholder="https://example.com" required>
+                <div class="loader" id="analyze-loader"></div>
+                <button type="submit" class="button">Analyze URL</button>
+            </form>
+            
+            <div class="button-container">
+                <button class="button" onclick="showSection('welcome-section')">Back to Home</button>
+            </div>
+        </section>
+
+        <section id="csv-upload-section">
+            <h2>Bulk URL Analysis</h2>
+            <p>Upload a CSV file with a single 'url' column to analyze multiple URLs.</p>
+            
+            <div id="csv-upload-section">
+                <input type="file" id="csv-file-input" accept=".csv" />
+                <label for="csv-file-input" class="file-upload-label">Choose CSV File</label>
+                <p id="selected-file-name">No file selected</p>
+                <button class="button" id="bulk-analyze-btn" disabled>Analyze CSV</button>
+            </div>
+            
+            <div class="button-container">
+                <button class="button" onclick="showSection('welcome-section')">Back to Home</button>
+            </div>
+        </section>
+
+        <section id="result-section">
+            <h2>Analysis Results</h2>
+            <p id="no-result-message">No analysis has been performed yet. Please enter a URL first.</p>
+            
+            <div class="result-container" id="result-container" style="display: none;">
+                <!-- Results will be displayed here -->
+            </div>
+            
+            <div class="button-container">
+                <button class="button" onclick="showSection('input-section')">Analyze Another URL</button>
+                <button class="button" onclick="showSection('welcome-section')">Back to Home</button>
+            </div>
+        </section>
+        
+        <footer>
+            &copy; 2025 Department of Information Technology, NITK Surathkal
+        </footer>
     </div>
 
     <script>
-        function storeOutput() {
-            fetch('/store', {
-                method: 'POST'
+        // Global variable to store the latest analysis result
+        let currentAnalysisResult = null;
+        
+        // Function to show a specific section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show the requested section
+            document.getElementById(sectionId).style.display = 'block';
+            
+            // Scroll to top when changing sections
+            window.scrollTo(0, 0);
+            
+            // If showing results without an analysis, show the message
+            if (sectionId === 'result-section' && !currentAnalysisResult) {
+                document.getElementById('no-result-message').style.display = 'block';
+                document.getElementById('result-container').style.display = 'none';
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('analyze-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const urlInput = document.getElementById('url-input');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            // Show loader
+            const loader = document.getElementById('analyze-loader');
+            loader.style.display = 'block';
+            
+            // Disable submit button during analysis
+            e.target.querySelector('button[type="submit"]').disabled = true;
+            
+            // Make the API request
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    url: url
+                })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
-                alert(data.message);
+                // Store the result
+                currentAnalysisResult = data;
+                
+                // Update UI
+                updateResultDisplay(data);
+                
+                // Navigate to result section
+                showSection('result-section');
+                
+                // Reset form
+                urlInput.value = '';
             })
             .catch(error => {
-                alert('Error storing output');
+                console.error('Error:', error);
+                alert('An error occurred during analysis: ' + error.message);
+            })
+            .finally(() => {
+                // Hide loader and re-enable submit button
+                loader.style.display = 'none';
+                e.target.querySelector('button[type="submit"]').disabled = false;
             });
+        });
+        
+        // Function to update the result display
+        function updateResultDisplay(data) {
+            const resultContainer = document.getElementById('result-container');
+            const noResultMessage = document.getElementById('no-result-message');
+            
+            // Hide the "no result" message and show the result container
+            noResultMessage.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Create result HTML
+            if (data.error) {
+                resultContainer.innerHTML = `
+                    <div class="result-box phishing">
+                        <div class="result-title phishing">Error</div>
+                        <p>${data.error}</p>
+                    </div>
+                `;
+            } else {
+                const isSafe = data.is_safe;
+                const statusClass = isSafe ? 'safe' : 'phishing';
+                
+                resultContainer.innerHTML = `
+                    <div class="result-box ${statusClass}">
+                        <div class="result-title ${statusClass}">Result: ${data.prediction}</div>
+                        <p><strong>Analyzed URL:</strong></p>
+                        <p class="result-url">${data.url}</p>
+                        <p>${isSafe 
+                            ? "This URL appears to be legitimate and safe to visit." 
+                            : "Warning! This URL has been identified as potentially malicious."
+                        }</p>
+                    </div>
+                `;
+            }
+            
         }
+        // Add CSV file upload functionality
+        const csvFileInput = document.getElementById('csv-file-input');
+        const selectedFileName = document.getElementById('selected-file-name');
+        const bulkAnalyzeBtn = document.getElementById('bulk-analyze-btn');
+
+        csvFileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                selectedFileName.textContent = file.name;
+                bulkAnalyzeBtn.disabled = false;
+            } else {
+                selectedFileName.textContent = 'No file selected';
+                bulkAnalyzeBtn.disabled = true;
+            }
+        });
+
+        // Adding bulk analyze event listener
+        bulkAnalyzeBtn.addEventListener('click', function() {
+            const file = csvFileInput.files[0];
+            if (!file) {
+                alert('Please select a CSV file first');
+                return;
+            }
+
+            // Show loader
+            const loader = document.getElementById('analyze-loader');
+            loader.style.display = 'block';
+            
+            // Disable button during analysis
+            bulkAnalyzeBtn.disabled = true;
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Make API request
+            fetch('/bulk-analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Network response was not ok');
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create a link to download the file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'url_analysis_results.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during bulk analysis: ' + error.message);
+            })
+            .finally(() => {
+                // Hide loader and re-enable button
+                loader.style.display = 'none';
+                bulkAnalyzeBtn.disabled = false;
+            });
+        });
+        
     </script>
 </body>
 </html>

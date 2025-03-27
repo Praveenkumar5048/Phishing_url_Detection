@@ -1,12 +1,13 @@
 import os
+import io
 import pickle
 import numpy as np
 import torch
 import validators
 import traceback
+import pandas as pd
 from transformers import BertTokenizer, BertModel
-from flask import Flask, request, render_template, jsonify
-
+from flask import Flask, request, render_template, jsonify, send_file
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -49,36 +50,16 @@ def extract_features(url):
     features = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
     return features
 
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/input', methods=['GET'])
-def input_page():
-    return render_template('input.html')
-
-@app.route('/output', methods=['GET'])
-def output_page():
-    return render_template('output.html')
-
-@app.route('/analyze', methods=['POST'])
-def analyze_url():
-    # Validate if all models are available
-    if not all([catboost_model, xgboost_model, lightgbm_model, meta_model]):
-        return jsonify({
-            'error': 'Phishing detection models are not available.'
-        }), 500
-    
-    # Get URL from request
-    url = request.form.get('url', '')
-    
+def predict_url(url):
+    """Predict single URL safety."""
     # Validate URL format
     if not url or not validators.url(url):
-        return jsonify({
-            'error': 'Please provide a valid URL.'
-        }), 400
-    
+        return {
+            'url': url,
+            'prediction': 'Invalid',
+            'is_safe': False
+        }
+
     try:
         # Extract features from TinyBERT
         features = extract_features(url)
@@ -95,23 +76,87 @@ def analyze_url():
         # Convert prediction to label
         prediction_label = "Phishing" if final_prediction == 0 else "Safe"
 
-        return jsonify({
+        return {
             'url': url,
             'prediction': prediction_label,
             'is_safe': prediction_label == 'Safe'
-        })
+        }
+    
+    except Exception as e:
+        return {
+            'url': url,
+            'prediction': 'Error',
+            'is_safe': False
+        }
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/analyze', methods=['POST'])
+def analyze_url():
+    # Validate if all models are available
+    if not all([catboost_model, xgboost_model, lightgbm_model, meta_model]):
+        return jsonify({
+            'error': 'Phishing detection models are not available.'
+        }), 500
+    
+    # Get URL from request
+    url = request.form.get('url', '')
+    
+    result = predict_url(url)
+    
+    return jsonify(result)
+
+@app.route('/bulk-analyze', methods=['POST'])
+def bulk_analyze_urls():
+    # Validate if all models are available
+    if not all([catboost_model, xgboost_model, lightgbm_model, meta_model]):
+        return jsonify({
+            'error': 'Phishing detection models are not available.'
+        }), 500
+    
+    # Check if file is present
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    
+    # Check if filename is empty
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    try:
+        # Read the CSV file
+        df = pd.read_csv(file)
+        
+        # Check if 'url' column exists
+        if 'url' not in df.columns:
+            return jsonify({'error': 'CSV must contain a "url" column'}), 400
+        
+        # Predict for each URL
+        results = []
+        for url in df['url']:
+            result = predict_url(url)
+            results.append(result)
+        
+        # Create results DataFrame
+        results_df = pd.DataFrame(results)
+        
+        # Prepare CSV for download
+        output = io.BytesIO()
+        results_df.to_csv(output, index=False)
+        output.seek(0)
+        
+        return send_file(output, 
+                         mimetype='text/csv', 
+                         as_attachment=True, 
+                         download_name='url_analysis_results.csv')
     
     except Exception as e:
         return jsonify({
-            'error': f'An error occurred during prediction: {str(e)}'
+            'error': f'An error occurred during bulk analysis: {str(e)}'
         }), 500
-
-@app.route('/store', methods=['POST'])
-def store_output():
-    return jsonify({
-        'message': 'Output stored successfully',
-        'status': 'success'
-    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
