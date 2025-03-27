@@ -1,5 +1,6 @@
 import os
 import pickle
+import joblib
 import numpy as np
 import torch
 import validators
@@ -45,10 +46,9 @@ class PhishingDetector:
 
 # Load the phishing detector model
 def load_model():
-    model_path = "phishing_detector.pkl"
+    model_path = "phishing_joblib_detector.joblib"
     try:
-        with open(model_path, "rb") as f:
-            detector = pickle.load(f)
+        detector = joblib.load(model_path)
         
         print(f"Model successfully loaded from {model_path}")
         return detector
